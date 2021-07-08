@@ -82,12 +82,15 @@ function createServer() {
             server = express_1.default();
             // here we can intialize body/cookies parsers, connect logger, for example morgan
             server.use(express_1.default.json());
+            /* istanbul ignore next */
             if (config_1.default.morganLogger) {
                 server.use(morgan_1.default(':method :url :status :response-time ms - :res[content-length]'));
             }
+            /* istanbul ignore next */
             if (config_1.default.morganBodyLogger) {
                 morgan_body_1.default(server);
             }
+            /* istanbul ignore next */
             if (config_1.default.exmplDevLogger) {
                 server.use(express_dev_logger_1.expressDevLogger);
             }

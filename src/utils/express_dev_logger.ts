@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import express from 'express'
 import logger from '@exmpl/utils/logger'
 const console = logger;
@@ -9,12 +11,12 @@ export const expressDevLogger = (req: express.Request, res: express.Response, ne
 
   const [oldWrite, oldEnd] = [res.write, res.end]
   const chunks: Buffer[] = []
-  ;(res.write as unknown) = function(chunk: any): void {
-    chunks.push(Buffer.from(chunk))
-    ;(oldWrite as Function).apply(res, arguments)
-  }
+    ; (res.write as unknown) = function (chunk: any): void {
+      chunks.push(Buffer.from(chunk))
+        ; (oldWrite as Function).apply(res, arguments)
+    }
 
-  res.end = function(chunk: any): void {
+  res.end = function (chunk: any): void {
     if (chunk) {
       chunks.push(Buffer.from(chunk))
     }
@@ -26,8 +28,8 @@ export const expressDevLogger = (req: express.Request, res: express.Response, ne
 
     const body = Buffer.concat(chunks).toString('utf8')
     console.http(`Response Body: ${body}`)
-    ;(oldEnd as Function).apply(res, arguments)
+      ; (oldEnd as Function).apply(res, arguments)
   }
-  
+
   next()
 }
