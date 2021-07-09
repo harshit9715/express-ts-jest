@@ -1,30 +1,32 @@
 openapi: 3.0.3
 info:
-  title: Backend API example
-  description: Backend API example API declaration
+  title: NWSL APIs
+  description: Backend APIs for soccer
   termsOfService: http://swagger.io/terms/
   contact:
-    email: harshit9715@gmail.com
+    email: support@thefanlounge.com
   license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0
   version: 1.0.0
 externalDocs:
-  description: Find out more about Swagger
-  url: http://swagger.io
+  description: Find out more about TFL
+  url: http://thefanlounge.com
 servers:
 - url: /api/v1
  
 tags:
-  - name: greeting
-    description: Greeting APIs
+  - name: Greeting
+    description: Example APIs
+  - name: Team
+    description: Team APIs
  
 paths:
   /hello:
     get:
       description: Returns 'Hello <name>/stranger!!!' to the caller
       tags: 
-        - greeting
+        - Greeting
       operationId: hello
       parameters:
       - name: name
@@ -40,21 +42,74 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HelloResponse'
-  /goodbye:
+  /soccer/{teamId}/players:
     get:
-      description: Returns 'Goodbye \<name\>!!!' to the authenticated caller
+      parameters:
+        - in: path
+          name: teamId
+          schema:
+            type: string
+          required: true
+          description: team name from user preference
+      description: Returns list of players in a team
       tags: 
-        - greeting
-      operationId: goodbye
-      security: 
-        - bearerAuth: []
+        - Team
+      operationId: listPlayers
+      # security: 
+      #   - bearerAuth: []
       responses:
         200:
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HelloResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlayerBasicResponse'
+        404:
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidRequest'
+                                  
+                  
+  
+  /soccer/{teamId}/players/{playerId}:
+    get:
+      parameters:
+        - in: path
+          name: teamId
+          schema:
+            type: string
+          required: true
+          description: team name from user preference
+        - in: path
+          name: playerId
+          schema:
+            type: string
+          required: true
+          description: returns player bio
+      description: Returns player bio
+      tags: 
+        - Team
+      operationId: playerDetails
+      # security: 
+      #   - bearerAuth: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerDetailedResponse'
+        404:
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidRequest'
+          
  
 components:
   securitySchemes:
@@ -62,6 +117,22 @@ components:
       type: http
       scheme: bearer
   schemas:
+    InvalidRequest:
+      type: object
+      properties:
+        error:
+          type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+            type:
+              type: string
+            errors:
+              type: array
+              items:
+                type: string
     HelloResponse:
       type: object
       additionalProperties: false
@@ -69,4 +140,47 @@ components:
         - message
       properties:
         message:
+          type: string
+    PlayerDetailedResponse:
+      allOf:
+        - $ref: '#/components/schemas/PlayerBasicResponse'
+        - type: object
+          required:
+            - nationality
+          properties:
+            description:
+              type: string
+            nationality:
+              type: string
+            dateOfBirth:
+              type: string
+              pattern: '^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$'
+            countryOfBirth:
+              type: string
+            shirtNumber:
+              type: integer
+            height:
+              type: integer
+            weight:
+              type: integer
+            gender:
+              type: string
+              enum: ["Female", "Male"]
+            matchName:
+                type: string
+    PlayerBasicResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        active:
+          type: boolean
+        firstName:
+          type: string
+        lastName:
+          type: string
+        position:
+          type: string
+        type:
           type: string

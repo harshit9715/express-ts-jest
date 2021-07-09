@@ -20,14 +20,16 @@ interface Config {
   morganLogger: boolean
   morganBodyLogger: boolean
   exmplDevLogger: boolean
-  loggerLevel: LogLevel 
+  loggerLevel: LogLevel
+  outletAuthKey: string
 }
 
 const config: Config = {
   morganLogger: parsedEnv.MORGAN_LOGGER as boolean,
   morganBodyLogger: parsedEnv.MORGAN_BODY_LOGGER as boolean,
   exmplDevLogger: parsedEnv.EXMPL_DEV_LOGGER as boolean,
-  loggerLevel: parsedEnv.LOGGER_LEVEL as LogLevel
+  loggerLevel: parsedEnv.LOGGER_LEVEL as LogLevel,
+  outletAuthKey: parsedEnv.outletAuthKey as string,
 }
 
 export default config
