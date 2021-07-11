@@ -39,14 +39,16 @@ export async function createServer(): Promise<Express> {
   const validatorOptions = {
     apiSpec: yamlSpecFile,
     validateRequests: true,
-    validateResponses: true
+    validateResponses: false
   }
   //   await new OpenApiValidator(validatorOptions).install(server) // if version 3.*
   server.use(OpenApiValidator.middleware(validatorOptions))
 
   // error customization, if request is invalid
+
+  /* istanbul ignore next */
   server.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    res.status(err.status).json({
+    res.status(err.status || 500).send({
       error: {
         type: 'request_validation',
         message: err.message,

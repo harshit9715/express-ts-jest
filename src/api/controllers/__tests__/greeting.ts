@@ -1,6 +1,7 @@
 import request from 'supertest'
 import {Express} from 'express-serve-static-core'
-
+import {rest} from 'msw';
+import {setupServer} from 'msw/node'
 import {createServer} from '@exmpl/utils/server'
 
 let server: Express

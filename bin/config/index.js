@@ -20,6 +20,7 @@ var config = {
     morganBodyLogger: parsedEnv.MORGAN_BODY_LOGGER,
     exmplDevLogger: parsedEnv.EXMPL_DEV_LOGGER,
     loggerLevel: parsedEnv.LOGGER_LEVEL,
-    outletAuthKey: parsedEnv.outletAuthKey,
+    outletAuthKey: parsedEnv.OUTLET_AUTH_KEY,
+    outletAuthSecret: parsedEnv.OUTLET_AUTH_SECRET,
 };
 exports.default = config;

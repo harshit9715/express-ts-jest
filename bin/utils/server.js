@@ -97,13 +97,14 @@ function createServer() {
             validatorOptions = {
                 apiSpec: yamlSpecFile,
                 validateRequests: true,
-                validateResponses: true
+                validateResponses: false
             };
             //   await new OpenApiValidator(validatorOptions).install(server) // if version 3.*
             server.use(OpenApiValidator.middleware(validatorOptions));
             // error customization, if request is invalid
+            /* istanbul ignore next */
             server.use(function (err, req, res, next) {
-                res.status(err.status).json({
+                res.status(err.status || 500).send({
                     error: {
                         type: 'request_validation',
                         message: err.message,
