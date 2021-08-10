@@ -37,7 +37,7 @@ const createSession = async () => {
         // @ts-ignore
         .map((key) => `${key}=${encodeURIComponent(params[key])}`)
         .join('&');
-    const resp = await axios.post(`https://api.performfeeds.com/oauth/token/${config.outletAuthKey}?_rt=b&_fmt=json`, data, {
+    const resp = await axios.post(`${BASE_URL}/oauth/token/${config.outletAuthKey}?_rt=b&_fmt=json`, data, {
         headers: {
             'content-type': 'application/x-www-form-urlencoded',
             Authorization: `Basic ${authN}`,
