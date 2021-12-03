@@ -10,13 +10,41 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-
+  start-runner:
+    name: Start self-hosted EC2 runner
     runs-on: ubuntu-latest
-
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          ec2-image-id: ami-0657d66051688d48b
+          ec2-instance-type: t2.micro
+          subnet-id: subnet-0e8857abb3b51e4b7
+          security-group-id: sg-0b5a0db983ff3e8bf
+          # iam-role-name: my-role-name # optional, requires additional permissions
+          aws-resource-tags: > # optional, requires additional permissions
+            [
+              {"Key": "Name", "Value": "ec2-github-runner"},
+              {"Key": "GitHubRepository", "Value": "${{ github.repository }}"}
+            ]
+  build:
+    needs: start-runner # required to start the main job when the runner is ready
+    runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [14.x] # [12.x, 14.x, 16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -26,6 +54,35 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1
+    
     - run: npm ci
     - run: npm run build --if-present
-    - run: npm test
+  
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - start-runner # required to get output from the start-runner job
+      - build # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Stop EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start-runner.outputs.label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.ec2-instance-id }}
+    
