@@ -33,6 +33,7 @@ jobs:
           ec2-instance-type: t2.micro
           subnet-id: subnet-0e8857abb3b51e4b7
           security-group-id: sg-0b5a0db983ff3e8bf
+          aws-region: ap-south-1
           # iam-role-name: my-role-name # optional, requires additional permissions
           aws-resource-tags: > # optional, requires additional permissions
             [
@@ -77,7 +78,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ap-south-1
       - name: Stop EC2 runner
         uses: machulav/ec2-github-runner@v2
         with:
@@ -85,4 +86,5 @@ jobs:
           github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           label: ${{ needs.start-runner.outputs.label }}
           ec2-instance-id: ${{ needs.start-runner.outputs.ec2-instance-id }}
+          aws-region: ap-south-1
     
